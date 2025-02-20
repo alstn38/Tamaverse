@@ -40,7 +40,6 @@ final class TamaCollectionViewCell: UICollectionViewCell, ReusableViewProtocol {
         tamaNameBackGroundView.layer.borderColor = UIColor(resource: .tamaFont).cgColor
         tamaNameBackGroundView.layer.borderWidth = 1
         
-        tamaNameLabel.text = "임시 타마고치" // TODO: 삭제
         tamaNameLabel.textColor = UIColor(resource: .tamaFont)
         tamaNameLabel.font = .systemFont(ofSize: 13, weight: .medium)
         tamaNameLabel.textAlignment = .center
