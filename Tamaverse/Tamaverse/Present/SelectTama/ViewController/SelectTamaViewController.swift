@@ -41,7 +41,10 @@ final class SelectTamaViewController: UIViewController {
     }
     
     private func configureBind() {
-        let input = SelectTamaViewModel.Input()
+        let input = SelectTamaViewModel.Input(
+            tamagotchiDidSelect: tamaCollectionView.rx.modelSelected(Tamagotchi.self).asObservable()
+        )
+        
         let output = viewModel.transform(from: input)
         
         output.tamagotchiInfo
@@ -52,6 +55,16 @@ final class SelectTamaViewController: UIViewController {
                 cell.configureCell(element)
             }
             .disposed(by: disposeBag)
+        
+        output.moveToAlertView
+            .drive(with: self) { owner, tamagotchi in
+                let viewModel = TamaSelectAlertViewModel(tamagotchi: tamagotchi)
+                let viewController = TamaSelectAlertViewController(viewModel: viewModel)
+                viewController.modalPresentationStyle = .overFullScreen
+                owner.present(viewController, animated: false)
+            }
+            .disposed(by: disposeBag)
+
     }
     
     private func configureNavigation() {
