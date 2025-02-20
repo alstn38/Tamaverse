@@ -7,21 +7,51 @@
 
 import UIKit
 import SnapKit
+import RxSwift
+import RxCocoa
 
 final class SelectTamaViewController: UIViewController {
+    
+    private let viewModel: SelectTamaViewModel
+    private let disposeBag = DisposeBag()
     
     private lazy var tamaCollectionView = UICollectionView(
         frame: .zero,
         collectionViewLayout: configureFlowLayout()
     )
     
+    init(viewModel: SelectTamaViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        configureBind()
         configureNavigation()
         configureView()
         configureHierarchy()
         configureLayout()
+    }
+    
+    private func configureBind() {
+        let input = SelectTamaViewModel.Input()
+        let output = viewModel.transform(from: input)
+        
+        output.tamagotchiInfo
+            .drive(tamaCollectionView.rx.items(
+                cellIdentifier: TamaCollectionViewCell.identifier,
+                cellType: TamaCollectionViewCell.self
+            )) { (row, element, cell) in
+                cell.configureCell(element)
+            }
+            .disposed(by: disposeBag)
     }
     
     private func configureNavigation() {
@@ -34,6 +64,10 @@ final class SelectTamaViewController: UIViewController {
         tamaCollectionView.backgroundColor = UIColor(resource: .tamaBackground)
         tamaCollectionView.showsVerticalScrollIndicator = false
         tamaCollectionView.showsHorizontalScrollIndicator = false
+        tamaCollectionView.register(
+            TamaCollectionViewCell.self,
+            forCellWithReuseIdentifier: TamaCollectionViewCell.identifier
+        )
     }
     
     private func configureHierarchy() {
@@ -42,7 +76,8 @@ final class SelectTamaViewController: UIViewController {
     
     private func configureLayout() {
         tamaCollectionView.snp.makeConstraints {
-            $0.edges.equalTo(view.safeAreaLayoutGuide)
+            $0.top.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
+            $0.bottom.equalToSuperview()
         }
     }
     
@@ -55,7 +90,7 @@ final class SelectTamaViewController: UIViewController {
         let cellLength: CGFloat = possibleCellLength / CGFloat(cellCountOfRow)
         
         let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
+        layout.scrollDirection = .vertical
         layout.minimumInteritemSpacing = minimumSpacing
         layout.minimumLineSpacing = minimumSpacing
         layout.itemSize = CGSize(width: cellLength, height: cellLength + 30)

@@ -27,6 +27,11 @@ final class TamaCollectionViewCell: UICollectionViewCell, ReusableViewProtocol {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func configureCell(_ tamagotchi: Tamagotchi) {
+        tamaNameLabel.text = tamagotchi.name
+        tamaImageView.image = UIImage(named: tamagotchi.profileImage)
+    }
+    
     private func configureView() {
         contentView.backgroundColor = UIColor(resource: .tamaBackground)
         
@@ -56,11 +61,12 @@ final class TamaCollectionViewCell: UICollectionViewCell, ReusableViewProtocol {
         }
         
         tamaNameBackGroundView.snp.makeConstraints {
-            $0.edges.equalTo(tamaNameLabel).inset(-4)
+            $0.edges.equalTo(tamaNameLabel).inset(-6)
         }
         
         tamaNameLabel.snp.makeConstraints {
             $0.top.equalTo(tamaImageView.snp.bottom).offset(15)
+            $0.centerX.equalToSuperview()
         }
     }
 }
