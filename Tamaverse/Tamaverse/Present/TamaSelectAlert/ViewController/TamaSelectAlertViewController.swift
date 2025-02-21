@@ -51,11 +51,16 @@ final class TamaSelectAlertViewController: UIViewController {
     
     private func configureBind() {
         let input = TamaSelectAlertViewModel.Input(
+            viewDidLoad: Observable.just(()),
             cancelButtonDidTap: cancelButton.rx.tap.asObservable(),
             confirmButtonDidTap: confirmButton.rx.tap.asObservable()
         )
         
         let output = viewModel.transform(from: input)
+        
+        output.selectModeTitle
+            .drive(confirmButton.rx.title())
+            .disposed(by: disposeBag)
         
         output.tamagotchiInfo
             .drive(with: self) { owner, info in
@@ -114,7 +119,6 @@ final class TamaSelectAlertViewController: UIViewController {
         cancelButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
         cancelButton.backgroundColor = .black.withAlphaComponent(0.1)
         
-        confirmButton.setTitle(StringLiterals.SelectTama.startButtonTitle, for: .normal) // TODO: 삭제
         confirmButton.setTitleColor(UIColor(resource: .tamaFont), for: .normal)
         confirmButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
     }
