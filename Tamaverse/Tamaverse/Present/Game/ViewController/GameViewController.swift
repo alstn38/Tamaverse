@@ -6,9 +6,14 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 import SnapKit
 
 final class GameViewController: UIViewController {
+    
+    private let disposeBag = DisposeBag()
+    private let tapGesture = UITapGestureRecognizer()
     
     private let profileButton = UIBarButtonItem()
     private let messageImageView = UIImageView()
@@ -22,6 +27,7 @@ final class GameViewController: UIViewController {
     private let foodCountLabel = UILabel()
     private let separatorLabel2 = UILabel()
     private let waterCountLabel = UILabel()
+    private let textFieldBackgroundView = UIView()
     private let foodTextField = UITextField()
     private let foodTextFieldLineView = UIView()
     private let foodButton = UIButton()
@@ -32,10 +38,19 @@ final class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        configureBind()
         configureNavigation()
         configureView()
         configureHierarchy()
         configureLayout()
+    }
+    
+    private func configureBind() {
+        tapGesture.rx.event
+            .bind(with: self) { owner, _ in
+                owner.view.endEditing(true)
+            }
+            .disposed(by: disposeBag)
     }
     
     private func configureNavigation() {
@@ -48,6 +63,7 @@ final class GameViewController: UIViewController {
     
     private func configureView() {
         view.backgroundColor = UIColor(resource: .tamaBackground)
+        view.addGestureRecognizer(tapGesture)
         
         messageImageView.image = UIImage(resource: .bubble)
         messageImageView.contentMode = .scaleToFill
@@ -95,6 +111,8 @@ final class GameViewController: UIViewController {
         waterCountLabel.textColor = UIColor(resource: .tamaFont)
         waterCountLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         
+        textFieldBackgroundView.backgroundColor = UIColor(resource: .tamaBackground)
+        
         foodTextField.placeholder = StringLiterals.Game.foodTextPlaceholder
         foodTextField.font = .systemFont(ofSize: 15, weight: .regular)
         foodTextField.textColor = UIColor(resource: .tamaFont)
@@ -132,6 +150,7 @@ final class GameViewController: UIViewController {
             characterNameBackGroundView,
             characterNameLabel,
             infoStackView,
+            textFieldBackgroundView,
             foodTextField,
             foodTextFieldLineView,
             foodButton,
@@ -181,11 +200,18 @@ final class GameViewController: UIViewController {
             $0.centerX.equalToSuperview()
         }
         
+        textFieldBackgroundView.snp.makeConstraints {
+            $0.top.equalTo(foodTextField.snp.top).offset(-4)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalTo(waterTextField.snp.bottom).offset(14)
+        }
+        
         foodTextField.snp.makeConstraints {
-            $0.top.equalTo(infoStackView.snp.bottom).offset(40)
+            $0.top.equalTo(infoStackView.snp.bottom).offset(40).priority(.medium)
             $0.leading.equalToSuperview().offset(60)
             $0.trailing.equalTo(view.snp.centerX).offset(30)
             $0.height.equalTo(34)
+            $0.bottom.lessThanOrEqualTo(waterTextField.snp.top).offset(-15).priority(.high)
         }
         
         foodTextFieldLineView.snp.makeConstraints {
@@ -202,10 +228,11 @@ final class GameViewController: UIViewController {
         }
         
         waterTextField.snp.makeConstraints {
-            $0.top.equalTo(foodTextField.snp.bottom).offset(15)
+            $0.top.equalTo(foodTextField.snp.bottom).offset(15).priority(.medium)
             $0.leading.equalToSuperview().offset(60)
             $0.trailing.equalTo(view.snp.centerX).offset(30)
             $0.height.equalTo(36)
+            $0.bottom.lessThanOrEqualTo(view.keyboardLayoutGuide.snp.top).offset(-10).priority(.high)
         }
         
         waterTextFieldLineView.snp.makeConstraints {
