@@ -14,6 +14,7 @@ final class SelectTamaViewController: UIViewController {
     
     private let viewModel: SelectTamaViewModel
     private let disposeBag = DisposeBag()
+    private let didSelectCharacterRelay = PublishRelay<Tamagotchi>()
     
     private lazy var tamaCollectionView = UICollectionView(
         frame: .zero,
@@ -34,7 +35,6 @@ final class SelectTamaViewController: UIViewController {
         super.viewDidLoad()
         
         configureBind()
-        configureNavigation()
         configureView()
         configureHierarchy()
         configureLayout()
@@ -42,10 +42,16 @@ final class SelectTamaViewController: UIViewController {
     
     private func configureBind() {
         let input = SelectTamaViewModel.Input(
-            tamagotchiDidSelect: tamaCollectionView.rx.modelSelected(Tamagotchi.self).asObservable()
+            viewDidLoad: Observable.just(()),
+            tamagotchiDidSelect: tamaCollectionView.rx.modelSelected(Tamagotchi.self).asObservable(),
+            tamagotchiDidChange: didSelectCharacterRelay.asObservable()
         )
         
         let output = viewModel.transform(from: input)
+
+        output.navigationTitle
+            .drive(navigationItem.rx.title)
+            .disposed(by: disposeBag)
         
         output.tamagotchiInfo
             .drive(tamaCollectionView.rx.items(
@@ -60,15 +66,37 @@ final class SelectTamaViewController: UIViewController {
             .drive(with: self) { owner, tamagotchi in
                 let viewModel = TamaSelectAlertViewModel(tamagotchi: tamagotchi)
                 let viewController = TamaSelectAlertViewController(viewModel: viewModel)
+                viewController.delegate = self
                 viewController.modalPresentationStyle = .overFullScreen
                 owner.present(viewController, animated: false)
             }
             .disposed(by: disposeBag)
-
-    }
-    
-    private func configureNavigation() {
-        navigationItem.title = StringLiterals.SelectTama.title
+        
+        output.startGame
+            .drive { _ in
+                guard
+                    let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                    let window = windowScene.windows.first
+                else { return }
+                
+                let navigationController = UINavigationController(rootViewController: GameViewController())
+                navigationController.view.alpha = 0.5
+                UIView.animate(withDuration: 0.4, delay: 0, options: .curveLinear) {
+                    navigationController.view.alpha = 1.0
+                }
+                
+                window.rootViewController = navigationController
+            }
+            .disposed(by: disposeBag)
+        
+        output.changeTamagotchi
+            .drive(with: self) { owner, _ in
+                owner.presentAlert(
+                    title: StringLiterals.SelectTama.changeAlertTitle,
+                    message: StringLiterals.SelectTama.changeAlertMessage
+                )
+            }
+            .disposed(by: disposeBag)
     }
     
     private func configureView() {
@@ -110,5 +138,13 @@ final class SelectTamaViewController: UIViewController {
         layout.sectionInset = UIEdgeInsets(top: insetSize, left: insetSize, bottom: insetSize, right: insetSize)
         
         return layout
+    }
+}
+
+// MARK: - TamaSelectAlertViewControllerDelegate
+extension SelectTamaViewController: TamaSelectAlertViewControllerDelegate {
+    
+    func viewController(_ viewController: UIViewController, didSelectCharacter item: Tamagotchi) {
+        didSelectCharacterRelay.accept(item)
     }
 }
