@@ -16,8 +16,30 @@ struct Tamagotchi {
 
 struct TamagotchiManager {
     
+    @UserDefault(key: TamagotchiManagerKey.currentCharacterID.key, defaultValue: -1)
+    private var currentCharacterID: Int
+    
+    var isSelectedCharacter: Bool {
+        return currentCharacterID != -1
+    }
+    
+    mutating func updateCurrentCharacter(at id: Int) {
+        currentCharacterID = id
+    }
+    
     func isActiveCharacter(at id: Int) -> Bool {
         return [1, 2, 3].contains(id)
+    }
+}
+
+extension TamagotchiManager {
+    
+    enum TamagotchiManagerKey: String {
+        case currentCharacterID
+        
+        var key: String {
+            return rawValue
+        }
     }
 }
 
