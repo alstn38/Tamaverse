@@ -10,10 +10,15 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
+protocol TamaSelectAlertViewControllerDelegate: AnyObject {
+    func viewController(_ viewController: UIViewController, didSelectCharacter item: Tamagotchi)
+}
+
 final class TamaSelectAlertViewController: UIViewController {
     
     private let viewModel: TamaSelectAlertViewModel
     private let disposeBag = DisposeBag()
+    weak var delegate: TamaSelectAlertViewControllerDelegate?
     
     private let alertView = UIView()
     private let tamaImageView = UIImageView()
@@ -45,12 +50,30 @@ final class TamaSelectAlertViewController: UIViewController {
     }
     
     private func configureBind() {
-        let input = TamaSelectAlertViewModel.Input()
+        let input = TamaSelectAlertViewModel.Input(
+            cancelButtonDidTap: cancelButton.rx.tap.asObservable(),
+            confirmButtonDidTap: confirmButton.rx.tap.asObservable()
+        )
+        
         let output = viewModel.transform(from: input)
         
         output.tamagotchiInfo
             .drive(with: self) { owner, info in
                 owner.configureView(info)
+            }
+            .disposed(by: disposeBag)
+        
+        output.selectTamagotchi
+            .drive(with: self) { owner, tamagotchi in
+                owner.dismiss(animated: false) {
+                    owner.delegate?.viewController(owner, didSelectCharacter: tamagotchi)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        output.deSelectTamagotchi
+            .drive(with: self) { owner, _ in
+                owner.dismiss(animated: false)
             }
             .disposed(by: disposeBag)
     }
