@@ -14,20 +14,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene)
-        let viewModel = SelectTamaViewModel()
-        let viewController = SelectTamaViewController(viewModel: viewModel)
-        let navigationController = UINavigationController(rootViewController: viewController)
+        let navigationController = getRootNavigationController()
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }
-
-    func sceneDidDisconnect(_ scene: UIScene) { }
-
-    func sceneDidBecomeActive(_ scene: UIScene) { }
-
-    func sceneWillResignActive(_ scene: UIScene) { }
-
-    func sceneWillEnterForeground(_ scene: UIScene) { }
-
-    func sceneDidEnterBackground(_ scene: UIScene) { }
+    
+    private func getRootNavigationController() -> UINavigationController {
+        let navigationController: UINavigationController
+        let tamagotchiManager = TamagotchiManager()
+        
+        switch tamagotchiManager.isSelectedCharacter {
+        case true:
+            let viewController = GameViewController()
+            navigationController = UINavigationController(rootViewController: viewController)
+            
+        case false:
+            let viewModel = SelectTamaViewModel()
+            let viewController = SelectTamaViewController(viewModel: viewModel)
+            navigationController = UINavigationController(rootViewController: viewController)
+        }
+        
+        return navigationController
+    }
 }
