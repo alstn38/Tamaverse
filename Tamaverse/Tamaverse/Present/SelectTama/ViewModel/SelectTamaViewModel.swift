@@ -26,7 +26,11 @@ final class SelectTamaViewModel: InputOutputModel {
     }
     
     private let disposeBag = DisposeBag()
-    private var tamagotchiManager = TamagotchiManager()
+    private var tamagotchiManager: TamagotchiManager
+    
+    init(tamagotchiManager: TamagotchiManager = DIContainer.shared.resolve(type: TamagotchiManager.self)) {
+        self.tamagotchiManager = tamagotchiManager
+    }
     
     func transform(from input: Input) -> Output {
         let navigationTitleRelay = BehaviorRelay(value: "")
