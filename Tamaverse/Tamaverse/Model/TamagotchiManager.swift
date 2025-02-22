@@ -28,6 +28,7 @@ protocol TamagotchiManageable {
     func addFoodCount(_ count: Int)
     func addWaterCount(_ count: Int)
     func isActiveCharacter(at id: Int) -> Bool
+    func reset()
 }
 
 final class TamagotchiManager: TamagotchiManageable {
@@ -98,6 +99,12 @@ final class TamagotchiManager: TamagotchiManageable {
     
     func isActiveCharacter(at id: Int) -> Bool {
         return [1, 2, 3].contains(id)
+    }
+    
+    func reset() {
+        currentCharacterID = -1
+        foodCount = 0
+        waterCount = 0
     }
     
     private func configureBind() {
