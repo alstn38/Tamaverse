@@ -12,6 +12,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         configureNavigationBarAppearance()
+        registerDIContainer()
         return true
     }
 
@@ -35,5 +36,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         appearance.standardAppearance = navigationBarAppearance
         appearance.scrollEdgeAppearance = navigationBarAppearance
         appearance.tintColor = UIColor(resource: .tamaFont)
+    }
+    
+    private func registerDIContainer() {
+        let container = DIContainer.shared
+        container.register(type: TamagotchiManager.self, component: TamagotchiManager())
+        container.register(type: UserInfoManager.self, component: UserInfoManager())
     }
 }
