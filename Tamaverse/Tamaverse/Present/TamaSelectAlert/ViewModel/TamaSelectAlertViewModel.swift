@@ -26,11 +26,11 @@ final class TamaSelectAlertViewModel: InputOutputModel {
     
     private let tamagotchi: Tamagotchi
     private let disposeBag = DisposeBag()
-    private let tamagotchiManager: TamagotchiManager
+    private let tamagotchiManager: TamagotchiManageable
     
     init(
         tamagotchi: Tamagotchi,
-        tamagotchiManager: TamagotchiManager = DIContainer.shared.resolve(type: TamagotchiManager.self)
+        tamagotchiManager: TamagotchiManageable = DIContainer.shared.resolve(type: TamagotchiManager.self)
     ) {
         self.tamagotchi = tamagotchi
         self.tamagotchiManager = tamagotchiManager

@@ -26,9 +26,9 @@ final class SelectTamaViewModel: InputOutputModel {
     }
     
     private let disposeBag = DisposeBag()
-    private var tamagotchiManager: TamagotchiManager
+    private var tamagotchiManager: TamagotchiManageable
     
-    init(tamagotchiManager: TamagotchiManager = DIContainer.shared.resolve(type: TamagotchiManager.self)) {
+    init(tamagotchiManager: TamagotchiManageable = DIContainer.shared.resolve(type: TamagotchiManager.self)) {
         self.tamagotchiManager = tamagotchiManager
     }
     
