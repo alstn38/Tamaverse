@@ -24,10 +24,18 @@ enum StringLiterals {
     }
     
     enum Game {
+        static let title: String = "님의 다마고치"
         static let separatorText: String = "·"
         static let foodTextPlaceholder: String = "밥주세용"
         static let waterTextPlaceholder: String = "물주세용"
         static let foodButtonTitle: String = "밥먹기"
         static let waterButtonTitle: String = "물먹기"
+        static let invalidCountTitle: String = "범위 오류"
+        static let invalidFoodCountMessage: String = "입력 가능한 범위가 아닙니다. 1개 이상 50개 미만의 입력을 해주세요."
+        static let invalidWaterCountMessage: String = "입력 가능한 범위가 아닙니다. 1개 이상 100개 미만의 입력을 해주세요."
+        static let levelText: String = "LV "
+        static let foodText: String = "밥알"
+        static let waterText: String = "물방울"
+        static let countText: String = "개"
     }
 }
