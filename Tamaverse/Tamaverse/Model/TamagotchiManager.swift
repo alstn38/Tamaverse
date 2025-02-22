@@ -16,7 +16,21 @@ struct Tamagotchi {
     let id: Int
 }
 
-final class TamagotchiManager {
+protocol TamagotchiManageable {
+    var characterNameObservable: Observable<String> { get }
+    var foodCountObservable: Observable<Int> { get }
+    var waterCountObservable: Observable<Int> { get }
+    var characterLevelObservable: Observable<Int> { get }
+    var characterImageObservable: Observable<String> { get }
+    var isSelectedCharacter: Bool { get }
+    
+    func updateCurrentCharacter(at id: Int)
+    func addFoodCount(_ count: Int)
+    func addWaterCount(_ count: Int)
+    func isActiveCharacter(at id: Int) -> Bool
+}
+
+final class TamagotchiManager: TamagotchiManageable {
     
     @UserDefault(key: TamagotchiManagerKey.currentCharacterID.key, defaultValue: -1)
     private var currentCharacterID: Int
@@ -30,13 +44,20 @@ final class TamagotchiManager {
     private lazy var characterNameRelay = BehaviorRelay(value: currentCharacterName)
     private lazy var foodCountRelay = BehaviorRelay(value: foodCount)
     private lazy var waterCountRelay = BehaviorRelay(value: waterCount)
+    private let characterLevelRelay = BehaviorRelay(value: 0)
+    private let characterImageRelay = BehaviorRelay(value: "")
+    private let disposeBag = DisposeBag()
     
-    private var currentCharacterName: String? {
-        guard isActiveCharacter(at: currentCharacterID) else { return nil }
+    init() {
+        configureBind()
+    }
+    
+    private var currentCharacterName: String {
+        guard isActiveCharacter(at: currentCharacterID) else { return "" }
         return TamagotchiManager.allTamagotchi[currentCharacterID].name
     }
     
-    var characterNameObservable: Observable<String?> {
+    var characterNameObservable: Observable<String> {
         return characterNameRelay.asObservable()
     }
     
@@ -46,6 +67,14 @@ final class TamagotchiManager {
     
     var waterCountObservable: Observable<Int> {
         return waterCountRelay.asObservable()
+    }
+    
+    var characterLevelObservable: Observable<Int> {
+        return characterLevelRelay.asObservable()
+    }
+    
+    var characterImageObservable: Observable<String> {
+        return characterImageRelay.asObservable()
     }
     
     var isSelectedCharacter: Bool {
@@ -69,6 +98,31 @@ final class TamagotchiManager {
     
     func isActiveCharacter(at id: Int) -> Bool {
         return [1, 2, 3].contains(id)
+    }
+    
+    private func configureBind() {
+        Observable.combineLatest(foodCountRelay, waterCountRelay)
+            .bind(with: self) { owner, count in
+                let (foodCount, waterCount) = count
+                let level = owner.calculateLevel(foodCount: foodCount, waterCount: waterCount)
+                owner.characterLevelRelay.accept(level)
+                
+                let imageString = owner.getCharacterImage(level: level)
+                owner.characterImageRelay.accept(imageString)
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    private func calculateLevel(foodCount: Int, waterCount: Int) -> Int {
+        let score = (Double(foodCount) / 5 + Double(waterCount) / 2) / 10
+        let level = max(1, min(10, Int(score)))
+        
+        return level
+    }
+    
+    private func getCharacterImage(level: Int) -> String {
+        let limitImageLevel = level == 10 ? 9: level
+        return [currentCharacterID, limitImageLevel].map { String($0) }.joined(separator: "-")
     }
 }
 
