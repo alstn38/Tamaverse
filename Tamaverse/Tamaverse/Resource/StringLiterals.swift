@@ -11,6 +11,8 @@ enum StringLiterals {
     
     enum Alert {
         static let confirm: String = "확인"
+        static let cancel: String = "취소"
+        static let delete: String = "삭제"
     }
     
     enum SelectTama {
@@ -37,5 +39,11 @@ enum StringLiterals {
         static let foodText: String = "밥알"
         static let waterText: String = "물방울"
         static let countText: String = "개"
+    }
+    
+    enum Setting {
+        static let title: String = "설정"
+        static let delegateAlertTitle: String = "데이터 초기화"
+        static let delegateAlertMessage: String = "정말 다시 처음부터 시작하시겠습니까?"
     }
 }
