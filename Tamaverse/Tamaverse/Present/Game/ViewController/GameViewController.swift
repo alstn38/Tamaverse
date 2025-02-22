@@ -12,7 +12,9 @@ import SnapKit
 
 final class GameViewController: UIViewController {
     
+    private let viewModel: GameViewModel
     private let disposeBag = DisposeBag()
+    private let viewWillAppearRelay = PublishRelay<Void>()
     private let tapGesture = UITapGestureRecognizer()
     
     private let profileButton = UIBarButtonItem()
@@ -35,6 +37,16 @@ final class GameViewController: UIViewController {
     private let waterTextFieldLineView = UIView()
     private let waterButton = UIButton()
     
+    init(viewModel: GameViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -45,7 +57,68 @@ final class GameViewController: UIViewController {
         configureLayout()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewWillAppearRelay.accept(())
+    }
+    
     private func configureBind() {
+        let input = GameViewModel.Input(
+            viewWillAppear: viewWillAppearRelay.asObservable(),
+            profileButtonDidTap: profileButton.rx.tap.asObservable(),
+            foodButtonDidTap: foodButton.rx.tap.withLatestFrom(foodTextField.rx.text.orEmpty).asObservable(),
+            waterButtonDidTap: waterButton.rx.tap.withLatestFrom(waterTextField.rx.text.orEmpty).asObservable()
+        )
+        
+        let output = viewModel.transform(from: input)
+        
+        output.titleText
+            .map { $0 + StringLiterals.Game.title }
+            .drive(navigationItem.rx.title)
+            .disposed(by: disposeBag)
+        
+        output.characterMessage
+            .drive(messageLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.characterImage
+            .map { UIImage(named: $0) }
+            .drive(characterImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        output.characterName
+            .drive(characterNameLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.characterLevel
+            .map { StringLiterals.Game.levelText + String($0) }
+            .drive(levelLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.foodCountText
+            .map { StringLiterals.Game.foodText + String($0) + StringLiterals.Game.countText }
+            .drive(foodCountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.waterCountText
+            .map { StringLiterals.Game.waterText + String($0) + StringLiterals.Game.countText }
+            .drive(waterCountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        output.moveToOtherView
+            .drive(with: self) { owner, _ in
+                let viewController = SettingViewController()
+                owner.navigationController?.pushViewController(viewController, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        output.presentAlert
+            .drive(with: self) { owner, value in
+                let (title, message) = value
+                owner.presentAlert(title: title, message: message)
+            }
+            .disposed(by: disposeBag)
+        
         tapGesture.rx.event
             .bind(with: self) { owner, _ in
                 owner.view.endEditing(true)
@@ -54,7 +127,6 @@ final class GameViewController: UIViewController {
     }
     
     private func configureNavigation() {
-        navigationItem.title = "대장님의 다마고치" // TODO: 삭제
         profileButton.image = UIImage(systemName: "person.circle")
         profileButton.style = .plain
         
@@ -68,9 +140,6 @@ final class GameViewController: UIViewController {
         messageImageView.image = UIImage(resource: .bubble)
         messageImageView.contentMode = .scaleToFill
         
-        characterImageView.image = UIImage(resource: ._1_1) // TODO: 삭제
-        
-        messageLabel.text = "복습 아직 안하셨다구요? 지금 잠이 오세여? 대장님?" // TODO: 삭제
         messageLabel.textColor = UIColor(resource: .tamaFont)
         messageLabel.textAlignment = .center
         messageLabel.font = .systemFont(ofSize: 13, weight: .semibold)
@@ -81,7 +150,6 @@ final class GameViewController: UIViewController {
         characterNameBackGroundView.layer.borderColor = UIColor(resource: .tamaFont).cgColor
         characterNameBackGroundView.layer.borderWidth = 1
         
-        characterNameLabel.text = "도레미파 다마고치" // TODO: 삭제
         characterNameLabel.textColor = UIColor(resource: .tamaFont)
         characterNameLabel.textAlignment = .center
         characterNameLabel.font = .systemFont(ofSize: 14, weight: .bold)
@@ -91,7 +159,6 @@ final class GameViewController: UIViewController {
         infoStackView.alignment = .center
         infoStackView.distribution = .equalSpacing
         
-        levelLabel.text = "LV 1" // TODO: 삭제
         levelLabel.textColor = UIColor(resource: .tamaFont)
         levelLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         
@@ -99,7 +166,6 @@ final class GameViewController: UIViewController {
         separatorLabel1.textColor = UIColor(resource: .tamaFont)
         separatorLabel1.font = .systemFont(ofSize: 18, weight: .bold)
         
-        foodCountLabel.text = "밥알 0개" // TODO: 삭제
         foodCountLabel.textColor = UIColor(resource: .tamaFont)
         foodCountLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         
@@ -107,7 +173,6 @@ final class GameViewController: UIViewController {
         separatorLabel2.textColor = UIColor(resource: .tamaFont)
         separatorLabel2.font = .systemFont(ofSize: 18, weight: .bold)
         
-        waterCountLabel.text = "물방울 0개" // TODO: 삭제
         waterCountLabel.textColor = UIColor(resource: .tamaFont)
         waterCountLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         
