@@ -23,6 +23,10 @@ final class UserInfoManager {
         userName = name
         userNameRelay.accept(name)
     }
+    
+    func reset() {
+        userName = "대장"
+    }
 }
 
 // MARK: - UserInfoManager UserDefaults Key
