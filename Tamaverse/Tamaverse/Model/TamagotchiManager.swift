@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import RxSwift
+import RxRelay
 
 struct Tamagotchi {
     let name: String
@@ -14,17 +16,55 @@ struct Tamagotchi {
     let id: Int
 }
 
-struct TamagotchiManager {
+final class TamagotchiManager {
     
     @UserDefault(key: TamagotchiManagerKey.currentCharacterID.key, defaultValue: -1)
     private var currentCharacterID: Int
+    
+    @UserDefault(key: TamagotchiManagerKey.foodCount.key, defaultValue: 0)
+    private var foodCount: Int
+    
+    @UserDefault(key: TamagotchiManagerKey.waterCount.key, defaultValue: 0)
+    private var waterCount: Int
+    
+    private lazy var characterNameRelay = BehaviorRelay(value: currentCharacterName)
+    private lazy var foodCountRelay = BehaviorRelay(value: foodCount)
+    private lazy var waterCountRelay = BehaviorRelay(value: waterCount)
+    
+    private var currentCharacterName: String? {
+        guard isActiveCharacter(at: currentCharacterID) else { return nil }
+        return TamagotchiManager.allTamagotchi[currentCharacterID].name
+    }
+    
+    var characterNameObservable: Observable<String?> {
+        return characterNameRelay.asObservable()
+    }
+    
+    var foodCountObservable: Observable<Int> {
+        return foodCountRelay.asObservable()
+    }
+    
+    var waterCountObservable: Observable<Int> {
+        return waterCountRelay.asObservable()
+    }
     
     var isSelectedCharacter: Bool {
         return currentCharacterID != -1
     }
     
-    mutating func updateCurrentCharacter(at id: Int) {
+    func updateCurrentCharacter(at id: Int) {
         currentCharacterID = id
+        characterNameRelay.accept(TamagotchiManager.allTamagotchi[id].name)
+    }
+    
+    func addFoodCount(_ count: Int) {
+        foodCount += count
+        foodCountRelay.accept(foodCount)
+    }
+    
+    func addWaterCount(_ count: Int) {
+        waterCount += count
+        waterCountRelay.accept(waterCount)
     }
     
     func isActiveCharacter(at id: Int) -> Bool {
@@ -32,10 +72,13 @@ struct TamagotchiManager {
     }
 }
 
+// MARK: - TamagotchiManager UserDefaults Key
 extension TamagotchiManager {
     
     enum TamagotchiManagerKey: String {
         case currentCharacterID
+        case foodCount
+        case waterCount
         
         var key: String {
             return rawValue
@@ -43,6 +86,7 @@ extension TamagotchiManager {
     }
 }
 
+// MARK: - TamagotchiManager Dummy Data
 extension TamagotchiManager {
     
     static var allTamagotchi: [Tamagotchi] {
