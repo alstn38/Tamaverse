@@ -78,8 +78,9 @@ final class SelectTamaViewController: UIViewController {
                     let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                     let window = windowScene.windows.first
                 else { return }
-                
-                let navigationController = UINavigationController(rootViewController: GameViewController())
+                let viewModel = GameViewModel()
+                let viewController = GameViewController(viewModel: viewModel)
+                let navigationController = UINavigationController(rootViewController:viewController)
                 navigationController.view.alpha = 0.5
                 UIView.animate(withDuration: 0.4, delay: 0, options: .curveLinear) {
                     navigationController.view.alpha = 1.0

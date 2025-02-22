@@ -25,7 +25,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         switch tamagotchiManager.isSelectedCharacter {
         case true:
-            let viewController = GameViewController()
+            let viewModel = GameViewModel()
+            let viewController = GameViewController(viewModel: viewModel)
             navigationController = UINavigationController(rootViewController: viewController)
             
         case false:
