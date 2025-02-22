@@ -107,7 +107,8 @@ final class GameViewController: UIViewController {
         
         output.moveToOtherView
             .drive(with: self) { owner, _ in
-                let viewController = SettingViewController()
+                let viewModel = SettingViewModel()
+                let viewController = SettingViewController(viewModel: viewModel)
                 owner.navigationController?.pushViewController(viewController, animated: true)
             }
             .disposed(by: disposeBag)
