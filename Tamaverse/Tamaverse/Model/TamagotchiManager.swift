@@ -84,7 +84,12 @@ final class TamagotchiManager: TamagotchiManageable {
     
     func updateCurrentCharacter(at id: Int) {
         currentCharacterID = id
-        characterNameRelay.accept(TamagotchiManager.allTamagotchi[id].name)
+        let newName = TamagotchiManager.allTamagotchi.first { $0.id == id }?.name ?? ""
+        characterNameRelay.accept(newName)
+        
+        let level = calculateLevel(foodCount: foodCount, waterCount: waterCount)
+        let imageString = getCharacterImage(level: level)
+        characterImageRelay.accept(imageString)
     }
     
     func addFoodCount(_ count: Int) {
