@@ -49,8 +49,8 @@ final class SettingViewController: UIViewController {
         
         output.settingArray
             .drive(settingTableView.rx.items(
-                cellIdentifier: "UITableViewCell",
-                cellType: UITableViewCell.self
+                cellIdentifier: SettingTableViewCell.identifier,
+                cellType: SettingTableViewCell.self
             )) { (row, element, cell) in
                 cell.textLabel?.text = element.title
                 cell.imageView?.image = UIImage(systemName: element.image)?.withRenderingMode(.alwaysTemplate)
@@ -117,7 +117,7 @@ final class SettingViewController: UIViewController {
         
         settingTableView.rowHeight = 60
         settingTableView.backgroundColor = UIColor(resource: .tamaBackground)
-        settingTableView.register(UITableViewCell.self, forCellReuseIdentifier: "UITableViewCell")
+        settingTableView.register(SettingTableViewCell.self, forCellReuseIdentifier: SettingTableViewCell.identifier)
     }
     
     private func configureHierarchy() {
