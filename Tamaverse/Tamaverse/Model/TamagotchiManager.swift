@@ -109,7 +109,9 @@ final class TamagotchiManager: TamagotchiManageable {
     func reset() {
         currentCharacterID = -1
         foodCount = 0
+        foodCountRelay.accept(0)
         waterCount = 0
+        waterCountRelay.accept(0)
     }
     
     private func configureBind() {
