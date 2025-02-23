@@ -46,4 +46,14 @@ enum StringLiterals {
         static let delegateAlertTitle: String = "데이터 초기화"
         static let delegateAlertMessage: String = "정말 다시 처음부터 시작하시겠습니까?"
     }
+    
+    enum ChangeName {
+        static let nickNameTextFieldPlaceholder: String = "닉네임을 입력해주세요."
+        static let navigationTitle: String = "님 이름 정하기"
+        static let saveButtonTitle: String = "저장"
+        static let successTitle: String = "변경 완료"
+        static let successMessage: String = "닉네임이 성공적으로 변경되었습니다."
+        static let faileTitle: String = "변경 실패"
+        static let faileMessage: String = "닉네임은 2글자 이상 6글자 이하까지 가능합니다."
+    }
 }
