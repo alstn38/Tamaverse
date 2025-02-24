@@ -26,6 +26,7 @@ final class UserInfoManager {
     
     func reset() {
         userName = "대장"
+        userNameRelay.accept(userName)
     }
 }
 
